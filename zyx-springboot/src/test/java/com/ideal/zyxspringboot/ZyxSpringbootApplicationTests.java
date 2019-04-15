@@ -5,6 +5,7 @@ import com.ideal.zyxspringboot.repository.AyUserRepository;
 import com.ideal.zyxspringboot.service.AyUserService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -16,6 +17,10 @@ import java.util.List;
 public class ZyxSpringbootApplicationTests {
     @Resource
     private AyUserService ayUserService;
+    @Test
+    public void testRedis(){
+    }
+
     @Test
     public void contextLoads() {
     }
@@ -33,4 +38,7 @@ public class ZyxSpringbootApplicationTests {
         ayUser.setPassword("123");
         ayUserService.save(ayUser);
     }
+
+
+
 }

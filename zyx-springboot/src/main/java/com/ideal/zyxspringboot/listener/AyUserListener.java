@@ -1,5 +1,6 @@
 package com.ideal.zyxspringboot.listener;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
@@ -7,7 +8,7 @@ import javax.servlet.annotation.WebListener;
 @WebListener
 public class AyUserListener implements ServletContextListener {
     /**
-     * 调用玩该方法后再对Filter进行初始化
+     * 调用完该方法后再对Filter进行初始化
      * */
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent){
