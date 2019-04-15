@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script type="text/javascript" src='js/jquery-2.1.1.js'></script>
+<script type="text/javascript" src='js/jquery.form.js'></script>
+<title>机器学习平台</title>
+</head>
+<style>
+table tr td {
+	border: 1px solid
+}
+</style>
+<body>
+	<div class="input-wrap">
+		<div action="" class="form-box d-flex justify-content-between">
+			<input id="word" type="text" placeholder="Search Courses"
+				class="form-control" name="word" />
+			<button id="search" type="submit" class="btn search-btn">分词</button>
+			<input id="result" />
+		</div>
+		<div action="" class="form-box d-flex justify-content-between">
+			<form action="" id="domeform" method="post"
+				enctype="multipart/form-data">
+				<input id="file_list" type="file" name="file" value="选择文件" /> <input
+					type="button" value="formdata提交" id="fileUpLoad" />
+			</form>
+			<div id="data_show"></div>
+			<div id="data_select">
+				<input id="features" name="features" placeholder="输入特征列的标号，多列已逗号相隔" />
+				<input id="filePath" name="filePath" /> <input id="result_id"
+					name="result_id" placeholder="输入结果列的标号" />
+				<button id="learn_sub">提交学习</button>
+			</div>
+
+			<!-- accept="application/vnd.sealed.xls" -->
+		</div>
+		<div action="" class="form-box d-flex justify-content-between">
+			<input id="file_list_test" type="file" class="form-control"
+				placeholder="文件上传" name="file_list_test">
+			<!-- accept="application/vnd.sealed.xls" -->
+			<button id="learn" type="submit" class="btn search-btn">学习</button>
+			<input id="lea_uid" placeholder="所得模型id" /> <input id="lea_result" />
+		</div>
+		<div action="" class="form-box d-flex justify-content-between">
+			<input id="test_model" type="text" class="form-control"
+				name="test_model" placeholder="输入模型 Id"> <input
+				id="test_data" type="text" class="form-control" name="test_data"
+				placeholder="输入测试数据">
+			<button id="test" type="submit" class="btn search-btn">测试</button>
+			<input id="test_result" /><input id="test_type" />
+		</div>
+	</div>
+</body>
+<script>
+//获取项目基地址
+var currPath = window.document.location.href;
+var pathName = window.document.location.pathname;
+var pos = currPath.indexOf(pathName);
+var localhostPath = currPath.substring(0,pos);
+var projectName = pathName.substring(0,pathName.substr(1).indexOf('/')+1);
+var realPath=localhostPath+projectName;
+$("#data_select").hide();
+//
+$("#search").click(function(){
+	  var url = "http://localhost:8888"+"/wordsSplit";
+	  var value = $("#word").val();
+	  console.log(value);
+	  $.ajax({
+		    url:url,    //请求的url地址
+		    dataType:"json",   //返回格式为json
+		    async:false,//请求是否异步，默认为异步，这也是ajax重要特性
+		    data:{"content":value},    //参数值
+		    type:"POST",   //请求方式 get 或者post
+		    success:function(data){
+		    	console.log(data);
+		    	$("#result").val(data.data);
+		    },
+		    error:function(){
+		    	console.log("error");
+		    } 
+		});
+});
+
+$("#fileUpLoad").click(function(){
+	var url = realPath+"/macLearn/fileUpload";
+	var excelPath = $("#file_list").val();
+	var fileObj = $("#file_list")[0].files; // js 获取文件对象
+	console.log("Path:"+excelPath);
+    if(excelPath == null || excelPath == ''){
+        alert("请选择要上传的Excel文件");
+        return;
+    }else{
+        var fileExtend = excelPath.substring(excelPath.lastIndexOf('.')).toLowerCase();
+        if(fileExtend == '.xls' || fileExtend == '.xlsx'){
+        	console.log("文件格式正确");
+        	console.log(fileObj);
+        	var formdata = new FormData($("#domeform")[0]);
+            //formFile.append("action", "UploadVMKImagePath");  
+            $.ajax({
+                url:url,
+                cache:false,
+                data:formdata,
+                dataType:'json',
+                type:"POST", 
+                processData: false,//用于对data参数进行序列化处理 这里必须false
+                contentType: false, //必须
+                success: function(data) {
+                	console.log(data.code);
+                	console.log(data.data);
+                	datas = data.data;
+                	var show_html="";
+                	var span_body="";
+                	var span_head ="";
+                	if(data.filePath!=null&&data.filePath!=""){
+                		$("#filePath").val(data.filePath);
+                	}
+                	for(var i=0;i<datas.length;i++){
+                		data = datas[i];
+                		console.log("data:"+data);
+                		var head="";
+                		var span=""
+                		if(span_head==""){
+                			for(var s=0;s<data.length;s++){
+                    			head=head+"<th>"+s+"</th>";
+                    		}
+                			span_head = "<tr>"+head+"</tr>";
+                		}
+                		for(var s=0;s<data.length;s++){
+                			console.log("string:"+data[s]);
+                			span=span+"<td>"+data[s]+"</td>";
+                		}
+                		span_body=span_body+"<tr>"+span+"</tr>";
+                	}
+                	show_html="<div class='show_excel'><table class='table_excel'>"+span_head+span_body+"</table></div>";
+                	$("#data_show").html(show_html);
+                	$("#data_select").show();
+                } ,
+                error:function(){
+                }
+            });
+        } else {
+            alert("文件格式需为'.xls'格式");
+            return;
+        }
+    }
+});
+$("#learn_sub").click(function(){
+		var url = realPath+"/macLearn/fileIn";
+		var features = $("#features").val();
+		var result = $("#result_id").val();
+		var filePath = $("#filePath").val();
+		console.log("result:"+result+"  filePath:"+filePath);
+		$.ajax({
+            url:url,
+            data:{"features":features,"result":result,"filePath":filePath},
+            dataType:'json',
+            type:"POST", 
+            success:function(){
+            	console.log("存入成功");
+            },
+            error:function(){
+            	
+            }
+		});
+});
+$("#learn").click(function(){
+	  var url = "http://localhost:8888"+"/learn";
+	  var path="www.baidu.com";
+	  $.ajax({
+		    url:url,    //请求的url地址
+		    dataType:"json",   //返回格式为json
+		    async:false,//请求是否异步，默认为异步，这也是ajax重要特性
+		    data:{"path":path,"id":1},    //参数值
+		    type:"POST",   //请求方式 get 或者post
+		    success:function(data){
+		    	console.log(data);
+		    	$("#lea_result").val(data.message);
+		    	$("#lea_uid").val(data.uid);
+		    },
+		    error:function(){
+		    	console.log("error");
+		    } 
+		});
+});
+//测试数据：25日中国杯季军争夺战，国足0比1输给乌兹别克斯坦，比赛进行到第37分钟，韦世豪背后铲球直接铲到舒库罗夫的小腿上，导致对手重伤离场，赛后确认舒库罗夫骨折，至少要缺席两个月时间。这次犯规韦世豪虽然逃过了主裁判的红牌处罚，但引起球迷的热议。赛后韦世豪两次向对手道歉，并且到乌兹别克斯坦的酒店当面致歉，但犯规引发的争议依然存在
+$("#test").click(function(){
+	  var url = "http://localhost:8888"+"/test";
+	  var modelId = $("#test_model").val();
+	  var data = $("#test_data").val();
+	  $.ajax({
+		    url:url,    //请求的url地址
+		    dataType:"json",   //返回格式为json
+		    async:false,//请求是否异步，默认为异步，这也是ajax重要特性
+		    data:{"data":data,"id":modelId},    //参数值
+		    type:"POST",   //请求方式 get 或者post
+		    success:function(data){
+		    	console.log(data);
+		    	$("#test_result").val(data.preRes);
+		    	if(data.preRes.trim()=="1"){
+		    		$("#test_type").val("体育类新闻");
+		    	}if(data.preRes.trim()=="0"){
+		    		$("#test_type").val("汽车类新闻");
+		    	}
+		    },
+		    error:function(){
+		    	console.log("error");
+		    } 
+		});
+});
+</script>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+
+    <script type="text/javascript" th:src="@{/js/jquery-2.1.1.js}"></script>
+    <title>算法配置</title>
+    <style>
+        table,table tr th, table tr td { border:1px solid #0094ff; }
+        table { min-height: 25px; line-height: 25px; text-align: center; border-collapse: collapse;}
+    </style>
+</head>
+<body>
+<div>
+    <form>
+        <select id="algoId" name="algoId">
+            <option value=""> -- 请选择 -- </option>
+            <option th:each="algo:${algos}"  th:value="${algo.id}" th:text="${algo.name}">
+            </option>
+        </select>
+    </form>
+    <table>
+        <tr><td>算法适用场景</td><td>&nbsp&nbsp</td><td>算法说明</td></tr>
+        <tr><td id="algo_scence" ></td><td>&nbsp&nbsp</td><td id="algo_detail"></td></tr>
+    </table>
+    <table id="params">
+
+    </table>
+    <div>
+        <span>输入数据测试集比例(1为100%)</span><span><input id="test_size" name="test_size"></span>
+    </div>
+    <button id="learn">学习</button>
+    <button id="learn_test">test学习</button>
+</div>
+</body>
+<script type="text/javascript">
+    //获取项目基地址
+    var currPath = window.document.location.href;
+    var pathName = window.document.location.pathname;
+    var pos = currPath.indexOf(pathName);
+    var localhostPath = currPath.substring(0,pos);
+    var projectName = pathName.substring(0,pathName.substr(1).indexOf('/')+1);
+    var realPath=localhostPath+projectName;
+    console.log("realPath:"+realPath);
+    console.log("localhostPath:"+localhostPath);
+    console.log("projectName:"+projectName);
+    $("#algoId").change(function () {
+        url=realPath+"/findById";
+        var id = $('#algoId option:selected').val();//选中的值
+        $.ajax({
+            url:url,    //请求的url地址
+            dataType:"json",   //返回格式为json
+            async:false,//请求是否异步，默认为异步，这也是ajax重要特性
+            data:{"id":id},    //参数值
+            type:"POST",   //请求方式 get 或者post
+            success:function(data){
+                console.log(data);
+                $("#algo_detail").html(data.detail);
+                $("#algo_scence").html(data.scence);
+            },
+            error:function(){
+                console.log("error");
+            }
+        });
+        url2 = realPath+"/findParamsAlgosByAlgoId";
+        $.ajax({
+            url:url2,    //请求的url地址
+            dataType:"json",   //返回格式为json
+            async:false,//请求是否异步，默认为异步，这也是ajax重要特性
+            data:{"id":id},    //参数值
+            type:"POST",   //请求方式 get 或者post
+            success:function(data){
+                console.log(data);
+                var html = "<tr><td>参数</td><td>参数输入</td><td>参数说明</td></tr>";
+                for(var i=0;i<data.length;i++){
+                    var param = "param"+i;
+                    var name = data[i].paramName;
+                    var detail = data[i].paramDetail;
+                    var tr="<tr><td>"+name+"</td><td>"+"<input name='"+name+"' id='"+name+"'>"+"</td><td>"+detail+"</td></tr>";
+                    html=html+tr;
+                }
+                $("#params").html(html);
+
+            },
+            error:function(){
+                console.log("error");
+            }
+        });
+
+    });
+
+    $("#learn").click(function () {
+        var url=realPath+"/learn";
+        var params_names = [];
+        var params_values=[];
+        var algo_name = $('#algoId option:selected').text();
+        $("#params").find("tr").each(function(){
+            var tdArr = $(this).children();
+            var value = tdArr.eq(1).find('input').val();
+            var name = tdArr.eq(1).find('input').attr("name");
+            if(typeof (name)!="undefined"&&typeof (value)!="undefined"){
+                params_names.push(name);
+                params_values.push(value);
+            }
+        });
+        var params_names_str = params_names.join(',');
+        var params_values_str = params_values.join(',');
+
+        $.ajax({
+            url:url,    //请求的url地址
+            dataType:"json",   //返回格式为json
+            async:false,//请求是否异步，默认为异步，这也是ajax重要特性
+            data:{"algo_name":algo_name,"params_names":params_names_str,"params_values":params_values_str},    //参数值
+            type:"POST",   //请求方式 get 或者post
+            success:function(data){
+                console.log(data);
+            },
+            error:function(){
+                console.log("error");
+            }
+        });
+    })
+
+    $("#learn_test").click(function () {
+        var url="http://localhost:8888"+"/algo_1";
+        var params_names = [];
+        var params_values=[];
+        var test_size = $('#test_size').val();
+        var algo_name = $('#algoId option:selected').text();
+        $("#params").find("tr").each(function(){
+            var tdArr = $(this).children();
+            var value = tdArr.eq(1).find('input').val();
+            var name = tdArr.eq(1).find('input').attr("name");
+            if(typeof (name)!="undefined"&&typeof (value)!="undefined"){
+                params_names.push(name);
+                params_values.push(value);
+            }
+        });
+        var params_names_str = params_names.join(',');
+        var params_values_str = params_values.join(',');
+
+        $.ajax({
+            url:url,    //请求的url地址
+            dataType:"json",   //返回格式为json
+            async:false,//请求是否异步，默认为异步，这也是ajax重要特性
+            data:{"algo_name":algo_name,"test_size":test_size,"params_names":params_names_str,"params_values":params_values_str},    //参数值
+            type:"POST",   //请求方式 get 或者post
+            success:function(data){
+                console.log(data);
+            },
+            error:function(){
+                console.log("error");
+            }
+        });
+    })
+
+</script>
+</html>
