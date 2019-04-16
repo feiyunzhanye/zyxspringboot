@@ -5,6 +5,7 @@ import com.ideal.zyxspringboot.repository.AyUserRepository;
 import com.ideal.zyxspringboot.service.AyUserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,9 +21,25 @@ import java.util.List;
 public class AyUserServiceImpl implements AyUserService {
     @Resource
     private AyUserRepository ayUserRepository;
+    @Resource
+    private RedisTemplate redisTemplate;
+    private static final String ALL_USER = "ALL_USER_LIST";
     @Override
     public AyUser findById(String id){
-        return ayUserRepository.findById(id).get();
+        List<AyUser> ayUserList = redisTemplate.opsForList().range(ALL_USER,0,-1);
+        if(ayUserList!=null&&ayUserList.size()>0){
+            for(AyUser user:ayUserList){
+                if(user.getId().equals(id)){
+                    return user;
+                }
+            }
+        }
+        AyUser ayUser = ayUserRepository.findById(id).get();
+        if(ayUser!=null){
+            //将数据添加到头部
+            redisTemplate.opsForList().leftPush(ALL_USER,ayUser);
+        }
+        return ayUser;
     }
 
     @Override
