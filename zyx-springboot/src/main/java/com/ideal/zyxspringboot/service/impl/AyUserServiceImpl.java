@@ -1,5 +1,6 @@
 package com.ideal.zyxspringboot.service.impl;
 
+import com.ideal.zyxspringboot.dao.AyUserDao;
 import com.ideal.zyxspringboot.model.AyUser;
 import com.ideal.zyxspringboot.repository.AyUserRepository;
 import com.ideal.zyxspringboot.service.AyUserService;
@@ -26,6 +27,8 @@ public class AyUserServiceImpl implements AyUserService {
     private AyUserRepository ayUserRepository;
     @Resource
     private RedisTemplate redisTemplate;
+    @Resource
+    private AyUserDao ayUserDao;
     private static final String ALL_USER = "ALL_USER_LIST";
     @Override
     public AyUser findById(String id){
@@ -85,4 +88,10 @@ public class AyUserServiceImpl implements AyUserService {
     public List<AyUser> findByIdIn(Collection<String> ids){
         return ayUserRepository.findByIdIn(ids);
     }
+
+    @Override
+    public AyUser findByNameAndPassword(String name,String password){
+        return ayUserDao.findByNameAndPassword(name,password);
+    }
+
 }
