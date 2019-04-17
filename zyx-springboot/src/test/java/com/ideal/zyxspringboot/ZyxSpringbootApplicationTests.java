@@ -3,6 +3,8 @@ package com.ideal.zyxspringboot;
 import com.ideal.zyxspringboot.model.AyUser;
 import com.ideal.zyxspringboot.repository.AyUserRepository;
 import com.ideal.zyxspringboot.service.AyUserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -72,5 +74,10 @@ public class ZyxSpringbootApplicationTests {
         System.out.println("缓存中用户数量："+redisUserSize);
         System.out.println("------》》》id："+ayUser2.getId()+" name:"+ayUser2.getName());
     }
-
+    Logger logger = LogManager.getLogger(this.getClass());
+    @Test
+    public void testLog4j(){
+        ayUserService.delete("4");
+        logger.info("delete success");
+    }
 }

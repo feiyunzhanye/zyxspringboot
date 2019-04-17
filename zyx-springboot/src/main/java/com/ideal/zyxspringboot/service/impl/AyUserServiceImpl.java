@@ -3,6 +3,8 @@ package com.ideal.zyxspringboot.service.impl;
 import com.ideal.zyxspringboot.model.AyUser;
 import com.ideal.zyxspringboot.repository.AyUserRepository;
 import com.ideal.zyxspringboot.service.AyUserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -19,6 +21,7 @@ import java.util.List;
 @Transactional
 @Service
 public class AyUserServiceImpl implements AyUserService {
+    Logger logger = LogManager.getLogger(this.getClass());
     @Resource
     private AyUserRepository ayUserRepository;
     @Resource
@@ -58,7 +61,9 @@ public class AyUserServiceImpl implements AyUserService {
 
     @Override
     public void delete(String id){
+
         ayUserRepository.deleteById(id);
+        logger.info("userId:"+id+"用户被删除");
     }
 
     @Override
