@@ -1,8 +1,10 @@
 package com.ideal.zyxspringboot;
 
+import com.ideal.zyxspringboot.activeMQ.AyMoodProducer;
 import com.ideal.zyxspringboot.model.AyUser;
 import com.ideal.zyxspringboot.repository.AyUserRepository;
 import com.ideal.zyxspringboot.service.AyUserService;
+import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
@@ -14,6 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
+import javax.jms.Destination;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
@@ -84,5 +87,12 @@ public class ZyxSpringbootApplicationTests {
     public void testMybatis(){
         AyUser ayUser = ayUserService.findByNameAndPassword("阿毅","123456");
         logger.info(ayUser.getId()+ayUser.getName());
+    }
+    @Resource
+    private AyMoodProducer ayMoodProducer;
+    @Test
+    public void testActiveMQ(){
+        Destination destination =new ActiveMQQueue("ay.queue");
+        ayMoodProducer.sendMessage(destination,"hello mq!");
     }
 }
