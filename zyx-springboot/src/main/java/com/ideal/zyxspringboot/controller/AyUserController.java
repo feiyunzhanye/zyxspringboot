@@ -1,5 +1,6 @@
 package com.ideal.zyxspringboot.controller;
 
+import com.ideal.zyxspringboot.error.BusinessException;
 import com.ideal.zyxspringboot.model.AyUser;
 import com.ideal.zyxspringboot.service.AyUserService;
 import org.springframework.stereotype.Controller;
@@ -20,5 +21,12 @@ public class AyUserController {
         List<AyUser> ayUserList = ayUserService.findAll();
         model.addAttribute("users",ayUserList);
         return "ayUser";
+    }
+
+    @RequestMapping("/findAll")
+    public String findAll(Model model){
+        List<AyUser> ayUserList =ayUserService.findAll();
+        model.addAttribute("user",ayUserList);
+        throw new BusinessException("业务异常");
     }
 }
