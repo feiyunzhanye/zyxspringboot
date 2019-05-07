@@ -3,7 +3,7 @@ package com.ideal.zyxspringboot.model;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
+// test pull request
 @Entity
 @Table(name="algo")
 public class Algo {
